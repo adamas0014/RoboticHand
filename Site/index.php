@@ -300,7 +300,7 @@ input:checked + .slider:before {
         <a class="nav-link" href="docs.html">Docs</a>
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="https://github.com/adamas0014/4ID3Project"><i class="fab fa-github"></i> Github</a>
+        <a class="nav-link" href="https://github.com/adamas0014/RoboticHand"><i class="fab fa-github"></i> Github</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
