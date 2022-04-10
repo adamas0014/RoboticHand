@@ -2,6 +2,7 @@ from cvzone.HandTrackingModule import HandDetector
 import cv2
 import paho.mqtt.client as mqtt
 import serial
+import time
 
 
 def on_connect(mqttc, obj, flags, rc):
@@ -42,11 +43,13 @@ mqttc.loop_start()
 
 cap = cv2.VideoCapture(0)
 detector = HandDetector(detectionCon=0.8, maxHands=1)
-mySerial = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
+mySerial = serial.Serial(port='COM7', baudrate=115200, timeout=.1)
 
 fingersStrPrev = ["0", "0", "0", "0", "0"]
 
 while True:
+    time.sleep(0.1) #Had some issues where the arduino wasnt sampling fast enough, this helps aleviate that
+    
     # Get image frame
     success, img = cap.read()
     # Find the hand and its landmarks
@@ -61,52 +64,39 @@ while True:
         centerPoint1 = hand1['center']  # center of the hand cx,cy
         handType1 = hand1["type"]  # Handtype Left or Right
 
-        fingers1 = detector.fingersUp(hand1)
+        fingers = detector.fingersUp(hand1)
 
         fingersStr = ["", "", "", "", ""]
-        index = 0;
-        for x in fingers1:
+        index = 0
+        for x in fingers:
             if x == 0:
                 fingersStr[index] = "1"
             else:
                 fingersStr[index] = "0"
-            index += 1;
+            index += 1
 
         if fingersStr != fingersStrPrev:
+            #Concatenate data for movement instruction
             fingersStr2 = "$" + str(fingersStr[0]) + str(fingersStr[1]) + str(fingersStr[2]) + str(fingersStr[3]) + str(fingersStr[4])
+            #convert string to bytes for the serial.write()
             fingersB = bytes(fingersStr2, 'utf-8')
             mySerial.write(fingersB)
+            #print to terminal
             print(fingersB)
+            #set previous value = current value
             fingersStrPrev = fingersStr
-
-
-        #print(fingersStr)
-
-        jsonVar = "{ \"thumbFinger\": " + "\"" + fingersStr[0] + "\"" + ", \"indexFinger\": " + "\"" + fingersStr[
+            #set up jstring for mqtt
+            jsonVar = "{ \"thumbFinger\": " + "\"" + fingersStr[0] + "\"" + ", \"indexFinger\": " + "\"" + fingersStr[
             1] + "\"" + ", \"middleFinger\": " \
                   + "\"" + fingersStr[2] + "\"" + ", \"ringFinger\": " + "\"" + fingersStr[
                       3] + "\"" + ", \"pinkyFinger\": " + "\"" + fingersStr[4] + "\"" + " }"
+            #publish
+            infot = mqttc.publish("robothand", jsonVar, qos=2)
+            infot.wait_for_publish()
 
-        infot = mqttc.publish("robothand", jsonVar, qos=2)
-        infot.wait_for_publish()
-        # if len(hands) == 2:
-        # Hand 2
-        # hand2 = hands[1]
-        # lmList2 = hand2["lmList"]  # List of 21 Landmark points
-        # bbox2 = hand2["bbox"]  # Bounding box info x,y,w,h
-        # centerPoint2 = hand2['center']  # center of the hand cx,cy
-        # handType2 = hand2["type"]  # Hand Type "Left" or "Right"
-
-        # fingers2 = detector.fingersUp(hand2)
-
-        # Find Distance between two Landmarks. Could be same hand or different hands
-        # length, info, img = detector.findDistance(lmList1[8], lmList2[8], img)  # with draw
-        # length, info = detector.findDistance(lmList1[8], lmList2[8])  # with draw
-    # Display
     cv2.imshow("Image", img)
     cv2.waitKey(1)
+
 cap.release()
 cv2.destroyAllWindows()
 
-# (rc, mid) = mqttc.publish("tuple", "bar", qos=2)
-# print("class")

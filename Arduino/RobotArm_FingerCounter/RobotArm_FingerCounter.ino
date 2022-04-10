@@ -1,132 +1,59 @@
 #include <Servo.h>
+#include <String.h>
 
-#define numOfValsRec 5
-#define digitsPerValRec 1
+Servo myservo1;  // create servo object to control a servo
+// twelve servo objects can be created on most boards
+Servo myservo2;
+Servo myservo3;
+Servo myservo4;
+Servo myservo5;
+int pos = 0;    // variable to store the servo position
 
-Servo servoThumb;
-Servo servoIndex;
-Servo servoMiddle;
-Servo servoRing;
-Servo servoPinky;
+String mystring;
 
-int valsRec[numOfValsRec];
-int stringLength = numOfValsRec * digitsPerValRec + 1;
-int counter = 0;
-bool counterStart = false;
-String receivedString;
-
-void setup() 
-{
+void setup() {
   Serial.begin(115200);
-  pinMode(7, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(3, OUTPUT);
-  servoThumb.attach(12);
-  servoIndex.attach(11);
-  servoMiddle.attach(10);
-  servoRing.attach(9);
-  servoPinky.attach(8);
+  myservo1.attach(7);  // attaches the servo on pin 7 to the servo object
+  myservo2.attach(6);
+  myservo3.attach(5);
+  myservo4.attach(4);
+  myservo5.attach(3);
 }
 
-void receiveData()
-{
-  while(Serial.available())
-  {
-    
-    char data[5];
-    char c = Serial.read();
-
-    if (c == '$')
-    {
-        for(int i = 0; i < 5 /*&& i != '\n'*/; i++){
-        data[i] = Serial.read();
-        }
-   
-    }
-    if(data[0] == '0'){/* for servo change to servo.Write, for High its servo.Write(180) and for low its servo.Write(0) */
-      servoThumb.write(180);
-      digitalWrite(7, HIGH);
+void loop() {
+if(Serial.available( ) > 0){
+  mystring = Serial.readString();
+  if(mystring[0] == '$'){
+    if(mystring[1] == '1'){
+      myservo1.write(180);
     }
     else{
-      servoThumb.write(0);
-      digitalWrite(7, LOW);
+      myservo1.write(0);
     }
-
-    
-    
-    if(data[1] == '0'){
-      servoIndex.write(180);
-      digitalWrite(6, HIGH);
+    if(mystring[2] == '1'){
+      myservo2.write(0);
     }
     else{
-      servoIndex.write(0);
-      digitalWrite(6, LOW);
+      myservo2.write(180);
     }
-
-    
-    if(data[2] == '0'){
-      servoMiddle.write(180);
-      digitalWrite(5, HIGH);
+    if(mystring[3] == '1'){
+      myservo3.write(180);
     }
     else{
-      servoMiddle.write(0);
-      digitalWrite(5, LOW);
+      myservo3.write(0);
     }
-
-
-    if(data[3] == '0'){
-      servoRing.write(180);
-      digitalWrite(4, HIGH);
+    if(mystring[4] == '1'){
+      myservo4.write(180);
     }
     else{
-      servoRing.write(0);
-      digitalWrite(4, LOW);
+      myservo4.write(0);
     }
-
-    if(data[4] == '0'){
-      servoPinky.write(180);
-      digitalWrite(3, HIGH);
+    if(mystring[5] == '1'){
+      myservo5.write(180);
     }
     else{
-      servoPinky.write(0);
-      digitalWrite(73, LOW);
+      myservo5.write(0);
     }
   }
-    /*
-    
-
-    
-    if (counterStart)
-    {
-      if (counter < stringLength)
-      {
-        receivedString = String(receivedString + c);
-        counter++;
-      }
-      if (counter >= stringLength)
-      {
-        for (int i = 0; i < numOfValsRec; i++)
-        {
-          int num = (i * digitsPerValRec) + 1;
-          valsRec[i] = receivedString.substring(num,num + digitsPerValRec).toInt();
-        }
-        receivedString = "";
-        counter = 0;
-        counterStart = false;
-      }
-    }
-    */
-  
 }
-
-void loop() 
-{
-  receiveData();
-  if (valsRec[0] == 1) {servoThumb.write(180);} else{servoThumb.write(0);}
-  if (valsRec[0] == 1) {servoIndex.write(180);} else{servoIndex.write(0);}
-  if (valsRec[0] == 1) {servoMiddle.write(180);} else{servoMiddle.write(0);}
-  if (valsRec[0] == 1) {servoRing.write(180);} else{servoRing.write(0);}
-  if (valsRec[0] == 1) {servoPinky.write(180);} else{servoPinky.write(0);}
 }
